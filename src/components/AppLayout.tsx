@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import logoWhite from "@/assets/liberta-logo-white.png";
 import iconLiberta from "@/assets/icone_liberta.png";
+import { useAuth } from "@/providers/AuthProvider";
 
 const navItems = [
   { to: "/app", icon: Home, label: "Início", end: true },
@@ -20,6 +21,7 @@ const navItems = [
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -63,7 +65,10 @@ export default function AppLayout() {
               Configurações
             </NavLink>
             <button
-              onClick={() => navigate("/")}
+              onClick={async () => {
+                await signOut();
+                navigate("/");
+              }}
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors w-full"
             >
               <LogOut className="h-4.5 w-4.5" />

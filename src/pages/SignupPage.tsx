@@ -5,16 +5,35 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
 import logoColorido from "@/assets/logo_liberta_colorido.png";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/app");
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name },
+        },
+      });
+      if (error) throw error;
+      toast.success("Conta criada!", { description: "Bem-vindo ao seu teste grátis de 4 dias." });
+      navigate("/app");
+    } catch (err) {
+      toast.error("Não foi possível criar sua conta", { description: String((err as any)?.message ?? err) });
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -42,7 +61,7 @@ export default function SignupPage() {
             <Label htmlFor="password">Senha</Label>
             <Input id="password" type="password" placeholder="Min. 8 caracteres" value={password} onChange={e => setPassword(e.target.value)} className="h-11 bg-secondary border-border" />
           </div>
-          <Button variant="hero" className="w-full h-11" type="submit">
+          <Button variant="hero" className="w-full h-11" type="submit" disabled={busy}>
             Criar Conta Grátis <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </form>
